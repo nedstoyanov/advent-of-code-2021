@@ -1,6 +1,6 @@
 import java.util.LinkedList
 
-data class SubState1(var count: Int, var previousDepth: Int) {
+class SubState1(private var count: Int = 0, private var previousDepth: Int = Int.MAX_VALUE) {
 
     fun calculate(element: Int) : SubState1 {
         if (element > this.previousDepth) {
@@ -9,22 +9,25 @@ data class SubState1(var count: Int, var previousDepth: Int) {
         this.previousDepth = element
         return this
     }
+
+    fun count(): Int = count
 }
 
-data class SubState2(
-    var count: Int,
-    var previousDepthSum: Int,
-    val previousDepths: LinkedList<Int>
+class SubState2(
+    private var numElementsToSum: Int = 3,
+    private var count: Int = 0,
+    private var previousDepthSum: Int = Int.MAX_VALUE,
+    private val previousDepths: LinkedList<Int> = LinkedList<Int>()
     ) {
 
     fun calculate(element: Int) : SubState2 {
         this.previousDepths.addLast(element)
 
-        if (this.previousDepths.size == 4) {
+        if (this.previousDepths.size == numElementsToSum + 1) {
             this.previousDepths.removeFirst()
         }
 
-        if (this.previousDepths.size == 3) {
+        if (this.previousDepths.size == numElementsToSum) {
             val sum = this.previousDepths.sum()
             if (sum > previousDepthSum) {
                 count++
@@ -34,6 +37,8 @@ data class SubState2(
 
         return this
     }
+
+    fun count(): Int = count
 }
 
 fun main() {
@@ -41,19 +46,15 @@ fun main() {
     fun part1(input: List<String>): Int {
         return input
             .map { it.toInt() }
-            .fold(SubState1(0, Int.MAX_VALUE)) { subState: SubState1, element: Int ->
-                subState.calculate(element)
-            }
-            .count
+            .fold(SubState1()) { subState, element -> subState.calculate(element) }
+            .count()
     }
 
     fun part2(input: List<String>): Int {
         return input
             .map { it.toInt() }
-            .fold(SubState2(0, Int.MAX_VALUE, LinkedList<Int>())) { subState: SubState2, element: Int ->
-                subState.calculate(element)
-            }
-            .count
+            .fold(SubState2()) { subState, element -> subState.calculate(element) }
+            .count()
     }
 
     val input = readInput("Day01")
